@@ -7,6 +7,22 @@ import (
 	"strconv"
 )
 
+func getIdsFromPair(pair string) (int, int, error) {
+	idPair := strings.Split(pair, "-")
+
+	if len(idPair) != 2 {
+		return 0, 0, fmt.Errorf("invalid id pair: %s", pair)
+	}
+
+	firstId, err1 := strconv.Atoi(idPair[0])
+	lastId, err2 := strconv.Atoi(idPair[1])
+	if err1 != nil || err2 != nil {
+		return 0, 0, fmt.Errorf("error converting ids: %v, %v", err1, err2)
+	}
+
+	return firstId, lastId, nil
+}
+
 func isRepeatedTwice(n int) bool {
 	str := strconv.Itoa(n)
 
@@ -45,6 +61,46 @@ func isRepeatedAtLeastTwice(n int) bool {
 	return false
 }
 
+func solvePart1(pairs []string) int {
+	res := 0
+
+	for _, pair := range pairs {
+		firstId, lastId, err := getIdsFromPair(pair)
+		if err != nil {
+			fmt.Println(err)
+			return 0
+		}
+
+		for i := firstId; i <= lastId; i++ {
+			if isRepeatedTwice(i) {
+				res += i
+			}
+		}
+	}
+
+	return res
+}
+
+func solvePart2(pairs []string) int {
+	res := 0
+
+	for _, pair := range pairs {
+		firstId, lastId, err := getIdsFromPair(pair)
+		if err != nil {
+			fmt.Println(err)
+			return 0
+		}
+
+		for i := firstId; i <= lastId; i++ {
+			if isRepeatedAtLeastTwice(i) {
+				res += i
+			}
+		}
+	}
+
+	return res
+}
+
 func main() {
     data, err := os.ReadFile("inputs/day02.txt")
     if err != nil {
@@ -54,53 +110,6 @@ func main() {
 
 	pairs := strings.Split(string(data), ",")
 
-	// part1
-	// res := 0
-
-	// for _, pair := range pairs {
-	// 	idPair := strings.Split(pair, "-")
-	// 	if len(idPair) != 2 {
-	// 		fmt.Println("Invalid id pair:", pair)
-	// 		return
-	// 	}
-
-	// 	firstId, err1 := strconv.Atoi(idPair[0])
-	// 	lastId, err2 := strconv.Atoi(idPair[1])
-	// 	if err1 != nil || err2 != nil {
-	// 		fmt.Println("Error converting ids:", err1, err2)
-	// 		return
-	// 	}
-
-	// 	for i := firstId; i <= lastId; i++ {
-	// 		if isRepeatedTwice(i) {
-	// 			res += i
-	// 		}
-	// 	}
-	// }
-
-	// fmt.Println("part1:", res)
-
-	// part2
-	res := 0
-	for _, pair := range pairs {
-		idPair := strings.Split(pair, "-")
-		if len(idPair) != 2 {
-			fmt.Println("Invalid id pair:", pair)
-			return
-		}
-
-		firstId, err1 := strconv.Atoi(idPair[0])
-		lastId, err2 := strconv.Atoi(idPair[1])
-		if err1 != nil || err2 != nil {
-			fmt.Println("Error converting ids:", err1, err2)
-			return
-		}
-
-		for i := firstId; i <= lastId; i++ {
-			if isRepeatedAtLeastTwice(i) {
-				res += i
-			}
-		}
-	}
-	fmt.Println("part2:", res)
+	fmt.Println("part1:", solvePart1(pairs))
+	fmt.Println("part2:", solvePart2(pairs))
 }
