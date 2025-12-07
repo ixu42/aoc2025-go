@@ -73,9 +73,7 @@ func countTimeline(r, c int, grid [][]rune) int {
 			total += countTimeline(r, c + 1, grid)
 		}
 	} else {
-		if r + 1 < len(grid) {
-			total += countTimeline(r + 1, c, grid)
-		}
+		total += countTimeline(r + 1, c, grid)
 	}
 
 	memo[key] = total
