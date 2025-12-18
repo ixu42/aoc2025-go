@@ -56,6 +56,16 @@ func union(x, y int) {
 	size[rootX] += size[rootY]
 }
 
+func ifAllConnected() bool {
+	root := find(0)
+	for i := 1; i < len(parent); i++ {
+		if find(i) != root {
+			return false
+		}
+	}
+	return true
+}
+
 func main() {
     data, err := os.ReadFile("inputs/day08.txt")
     if err != nil {
@@ -106,16 +116,21 @@ func main() {
 		size[i] = 1 // each circuit starts with size 1
 	}
 
-	limit := 1000
-	if limit > len(conns) {
-		limit = len(conns)
-	}
-	for k := 0; k < limit; k++ {
+	// limit := 1000
+	// if limit > len(conns) {
+	// 	limit = len(conns)
+	// }
+	// for k := 0; k < limit; k++ {
+	lastPair := make([]int, 2)
+	for k := 0; k < len(conns); k++ {
 		conn := conns[k]
 		// fmt.Printf("box %d and box %d: distance %.2f\n", conn.a, conn.b, conn.dist)
-		// if not already connected, connect them
-		if find(conn.a) != find(conn.b) {
+		// if not already connected, connect them and if all connected, stop
+		if find(conn.a) != find(conn.b) && !ifAllConnected() {
 			union(conn.a, conn.b)
+			lastPair[0] = conn.a
+			lastPair[1] = conn.b
+			// fmt.Printf("Connected box %d and box %d\n", conn.a, conn.b)
 		}
 	}
 
@@ -142,6 +157,8 @@ func main() {
 		res *= sizes[i]
 	}
 
-	fmt.Printf("part1: %d\n", res)
+	// fmt.Printf("part1: %d\n", res)
+
+	fmt.Printf("part2: %d\n", int(boxes[lastPair[0]].x*boxes[lastPair[1]].x))
 
 }
