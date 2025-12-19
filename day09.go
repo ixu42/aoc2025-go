@@ -7,19 +7,11 @@ import (
 	"strconv"
 )
 
-var redTiles []point
-
 type point struct {
 	r, c int
 }
 
-type rectangle struct {
-	size int
-	redTile1 point
-	redTile2 point
-	isValid bool // whether the rectangle is inside the polygon
-}
-
+var redTiles []point // vertices of the polygon
 
 func abs(x int) int {
     if x < 0 {
@@ -28,6 +20,41 @@ func abs(x int) int {
     return x
 }
 
+func loadRedTiles(lines []string) {
+	for _, line := range lines {
+		elems := strings.Split(line, ",")
+		if len(elems) != 2 {
+			fmt.Println("invalid input:", line)
+			continue
+		}
+		c, errC := strconv.Atoi(elems[0])
+		r, errR := strconv.Atoi(elems[1])
+		if errC != nil || errR != nil {
+			fmt.Println("invalid coordinates:", line)
+			continue
+		}
+		redTiles = append(redTiles, point{r, c})
+	}
+}
+
+func solvePart1() int {
+	maxSize := 0
+	rectCount := 0
+	for i := 0; i < len(redTiles); i++ {
+		for j := i + 1; j < len(redTiles); j++ {
+			rectCount++
+			size := (abs(redTiles[i].r - redTiles[j].r) + 1) * (abs(redTiles[i].c - redTiles[j].c) + 1)
+			if size > maxSize {
+				maxSize = size
+			}
+		}
+	}
+
+	return maxSize
+}
+
+// cast a ray to the right, count intersections with polygon edges
+// if odd -> inside, even -> outside
 func isPointInPolygon(p point) bool {
 	intersections := 0
 	n := len(redTiles)
@@ -58,7 +85,7 @@ func isPointInPolygon(p point) bool {
 			}
 		}
 	}
-	return intersections % 2 == 1 // odd -> inside, even -> outside
+	return intersections % 2 == 1
 }
 
 func isHorizontal(r1, c1, r2, c2 int) bool {
@@ -67,11 +94,6 @@ func isHorizontal(r1, c1, r2, c2 int) bool {
 
 func isVertical(r1, c1, r2, c2 int) bool {
     return c1 == c2
-}
-
-func segmentsOverlap(a1, a2, b1, b2 int) bool {
-    return max(a1, a2) > min(b1, b2) &&
-           max(b1, b2) > min(a1, a2)
 }
 
 func rectEdgeIntersectsPolygonEdge(r1, c1, r2, c2 int) bool {
@@ -113,7 +135,7 @@ func rectEdgeIntersectsPolygonEdge(r1, c1, r2, c2 int) bool {
 }
 
 // the rectangle is valid if
-// 1. it's 4 corners are all inside the polygon
+// 1. it's 4 corners are all inside the polygon, and
 // 2. it's 4 edges do not intersect with any polygon edge
 func isValidRect(i, j int) bool {
 	r1 := redTiles[i].r
@@ -146,6 +168,22 @@ func isValidRect(i, j int) bool {
 	return true
 }
 
+func solvePart2() int {
+	maxValidSize := 0
+	for i := 0; i < len(redTiles); i++ {
+		for j := i + 1; j < len(redTiles); j++ {
+			size := (abs(redTiles[i].r - redTiles[j].r) + 1) * (abs(redTiles[i].c - redTiles[j].c) + 1)
+			if size <= maxValidSize {
+				continue
+			}
+			if isValidRect(i, j) {
+				maxValidSize = size
+			}
+		}
+	}
+	return maxValidSize
+}
+
 func main() {
     data, err := os.ReadFile("inputs/day09.txt")
     if err != nil {
@@ -156,48 +194,8 @@ func main() {
 	lines := strings.Split(string(data), "\n")
 
 	redTiles = make([]point, 0, len(lines))
-	for _, line := range lines {
-		elems := strings.Split(line, ",")
-		if len(elems) != 2 {
-			fmt.Println("invalid input:", line)
-			continue
-		}
-		c, errC := strconv.Atoi(elems[0])
-		r, errR := strconv.Atoi(elems[1])
-		if errC != nil || errR != nil {
-			fmt.Println("invalid coordinates:", line)
-			continue
-		}
-		redTiles = append(redTiles, point{r, c})
-	}
+	loadRedTiles(lines)
 
-	maxSize := 0
-	rectCount := 0
-	for i := 0; i < len(redTiles); i++ {
-		for j := i + 1; j < len(redTiles); j++ {
-			rectCount++
-			size := (abs(redTiles[i].r - redTiles[j].r) + 1) * (abs(redTiles[i].c - redTiles[j].c) + 1)
-			if size > maxSize {
-				maxSize = size
-			}
-		}
-	}
-	fmt.Printf("part1: %d\n", maxSize)
-
-	// part2
-	maxValidSize := 0
-	for i := 0; i < len(redTiles); i++ {
-		for j := i + 1; j < len(redTiles); j++ {
-			size := (abs(redTiles[i].r - redTiles[j].r) + 1) * (abs(redTiles[i].c - redTiles[j].c) + 1)
-			if size <= maxValidSize {
-				continue
-			}
-			if isValidRect(i, j) {
-				fmt.Printf("update maxValidSize to %d\n", size)
-				maxValidSize = size
-			}
-		}
-	}
-
-	fmt.Printf("part2: %d\n", maxValidSize)
+	fmt.Printf("part1: %d\n", solvePart1())
+	fmt.Printf("part2: %d\n", solvePart2())
 }
