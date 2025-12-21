@@ -14,7 +14,6 @@ import (
 type machine struct {
 	target	[]int
 	buttons	[][]int
-	joltage	[]int
 }
 
 var (
@@ -39,7 +38,7 @@ func parseInts(s string) []int {
 	return nums
 }
 
-func parseLine(line string) *machine {
+func parseTargetsAndButtonsPart1(line string) *machine {
 	m := &machine{}
 
 	if match := targetRe.FindStringSubmatch(line); match != nil {
@@ -57,16 +56,28 @@ func parseLine(line string) *machine {
 	}
 
 	buttonMatches := buttonRe.FindAllStringSubmatch(line, -1)
+	m.buttons = make([][]int, 0, len(buttonMatches))
 	for _, wm := range buttonMatches {
 		nums := parseInts(wm[1])
 		m.buttons = append(m.buttons, nums)
 	}
 
+	return m
+}
+
+func parseTargetsAndButtonsPart2(line string) *machine {
+	m := &machine{}
+
 	if match := joltageRe.FindStringSubmatch(line); match != nil {
-		nums := parseInts(match[1])
-		m.joltage = nums
+		m.target = parseInts(match[1])
 	} else {
 		log.Fatal("invalid or missing joltage requirements")
+	}
+
+	buttonMatches := buttonRe.FindAllStringSubmatch(line, -1)
+	for _, wm := range buttonMatches {
+		nums := parseInts(wm[1])
+		m.buttons = append(m.buttons, nums)
 	}
 
 	return m
@@ -78,11 +89,11 @@ func pressButtonToToggle(state []int, button []int) {
 	}
 }
 
-// func pressButtonToIncrement(counters []int, button []int) {
-// 	for _, idx := range button {
-// 		counters[idx]++
-// 	}
-// }
+func pressButtonToIncrement(counters []int, button []int) {
+	for _, idx := range button {
+		counters[idx]++
+	}
+}
 
 func solvePart1(file *os.File) int {
 	res := 0
@@ -93,7 +104,7 @@ func solvePart1(file *os.File) int {
 			continue
 		}
 
-		machine := parseLine(line)
+		machine := parseTargetsAndButtonsPart1(line)
 
 		// fmt.Printf("%+v\n", machine)
 
@@ -147,7 +158,7 @@ func main() {
 	}
 	defer file.Close()
 
-	// fmt.Println("part1:", solvePart1(file))
+	fmt.Println("part1:", solvePart1(file))
 
 	// part2
 	file.Seek(0, io.SeekStart) // reset file pointer to beginning
@@ -159,9 +170,9 @@ func main() {
 			continue
 		}
 
-		machine := parseLine(line)
+		// machine := parseTargetsAndButtonsPart2(line)
 
-		fmt.Printf("%+v\n", machine)
+		// fmt.Printf("%+v\n", machine)
 
 		// todo
 	}
