@@ -217,7 +217,7 @@ func solvePart2(file *os.File) int {
 }
 
 func main() {
-	file, err := os.Open("../inputs/day10.txt")
+	file, err := os.Open("inputs/day10.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

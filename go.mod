@@ -1,4 +1,4 @@
-module day10
+module github.com/ixu42/aoc2025
 
 go 1.25.5
 
