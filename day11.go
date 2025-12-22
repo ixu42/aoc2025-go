@@ -8,16 +8,48 @@ import (
 )
 
 var graph map[string][]string
+var memo map[string]int // key:current-containsFFT-containsDAC, value:pathCount
 
-func countPath(current string) int {
+func countPathPart1(current string) int {
 	if current == "out" {
 		return 1
 	}
 
 	totalPaths := 0
 	for _, next := range graph[current] {
-		totalPaths += countPath(next)
+		totalPaths += countPathPart1(next)
 	}
+	return totalPaths
+}
+
+// count paths from current to "out" that contain both "fft" and "dac"
+func countPathPart2(current string, containsFFT, containsDAC bool) int {
+	key := fmt.Sprintf("%s-%t-%t", current, containsFFT, containsDAC)
+	if pathCount, found := memo[key]; found {
+		return pathCount
+	}
+
+	if current == "out" {
+		if containsFFT && containsDAC {
+			return 1
+		}
+		return 0
+	}
+
+	totalPaths := 0
+	for _, next := range graph[current] {
+		newFFT := containsFFT
+		newDAC := containsDAC
+		if next == "fft" {
+			newFFT = true
+		}
+		if next == "dac" {
+			newDAC = true
+		}
+		totalPaths += countPathPart2(next, newFFT, newDAC)
+	}
+
+	memo[key] = totalPaths
 	return totalPaths
 }
 
@@ -46,5 +78,7 @@ func main() {
 	// 	fmt.Println(device, "->", outs)
 	// }
 
-	fmt.Println("part1:", countPath("you"))
+	// fmt.Println("part1:", countPathPart1("you"))
+	memo = make(map[string]int)
+	fmt.Println("part2:", countPathPart2("svr", false, false))
 }
