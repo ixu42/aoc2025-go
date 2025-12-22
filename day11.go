@@ -74,11 +74,10 @@ func main() {
 		graph[device] = outputList
 	}
 
-	// for device, outs := range graph {
-	// 	fmt.Println(device, "->", outs)
-	// }
+	// part1
+	fmt.Println("part1:", countPathPart1("you"))
 
-	// fmt.Println("part1:", countPathPart1("you"))
+	// part2
 	memo = make(map[string]int)
 	fmt.Println("part2:", countPathPart2("svr", false, false))
 }
